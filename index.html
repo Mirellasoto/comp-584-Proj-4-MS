@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Five Dice Roller</title>
+<link rel="stylesheet" href="style.css">
+
+<!-- here I am using the popmotion library -->
+<script src="https://unpkg.com/popmotion@8.7.1/dist/popmotion.global.min.js"></script>
+</head>
+<body>
+
+<h1>Five Dice Roller</h1>
+
+<!-- putting the dice in a grid -->
+<div class="dice-container">
+  <div class="dice-grid">
+    <div class="dice">?</div>
+    <div class="dice">?</div>
+    <div class="dice">?</div>
+    <div class="dice">?</div>
+    <div class="dice">?</div>
+  </div>
+</div>
+
+<button id="roll-btn">Roll Dice</button>
+
+<script>
+const dice = document.querySelectorAll(".dice");
+document.getElementById("roll-btn").onclick = () => {
+  dice.forEach((d, i) => {
+    d.style.transform = "translateY(-200px)";
+    let n = 1;
+    const interval = setInterval(() => {
+      d.textContent = n;
+      n = n % 6 + 1;
+    }, 80);
+
+    /* here I am using the rolz api to get the value of a 6 sided die roll*/
+    fetch("https://rolz.org/api/?1d6.json")
+      .then(res => res.json())
+      .then(data => {
+        const finalValue = data.result;
+
+         /* here I am using using the spring found on popmotion*/
+        popmotion.spring({from: -200, to:0, stiffness:400, damping:18}).start(v => {
+          d.style.transform = `translateY(${v}px)`;
+        });
+        setTimeout(() => {
+          clearInterval(interval);
+          d.textContent = finalValue;
+        }, 700);
+      })
+      .catch(() => {
+        clearInterval(interval);
+        d.textContent = "x";
+      });
+  });
+};
+</script>
+
+</body>
+</html>
